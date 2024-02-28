@@ -3,6 +3,7 @@ import { databaseFactory, type Drizzle } from "../db/drizzle/db";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import express from "express";
 import { customerRouter } from "./routes/customer.route";
+import { productRouter } from "./routes/product.route";
 
 declare global {
 	namespace Express {
@@ -31,5 +32,7 @@ export async function setupApp(): Promise<App> {
 	});
 
 	app.use(customerRouter);
+	app.use(productRouter);
+
 	return { engine: app, db };
 }
