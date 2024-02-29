@@ -1,8 +1,9 @@
 import { AggregateRoot } from "../../@shared/entity/aggregate-root";
+import { Entity } from "../../@shared/entity/entity.abstract";
+import { NotificationError } from "../../@shared/notification/notification.error";
 import type { ProductInterface } from "./product.interface";
 
-export class Product extends AggregateRoot implements ProductInterface {
-	private _id: string;
+export class Product extends Entity implements ProductInterface {
 	private _name: string;
 	private _price: number;
 
@@ -12,10 +13,6 @@ export class Product extends AggregateRoot implements ProductInterface {
 		this._name = name;
 		this._price = price;
 		this.validate();
-	}
-
-	get id(): string {
-		return this._id;
 	}
 
 	get name(): string {
@@ -28,15 +25,28 @@ export class Product extends AggregateRoot implements ProductInterface {
 
 	validate(): void {
 		if (!this._id) {
-			throw new Error("Id is required");
+			this.notification.addError({
+				message: "Id is required",
+				context: "product",
+			});
 		}
 
 		if (!this._name) {
-			throw new Error("Name is required");
+			this.notification.addError({
+				message: "Name is required",
+				context: "product",
+			});
 		}
 
 		if (this._price <= 0) {
-			throw new Error("Price must be greater than zero");
+			this.notification.addError({
+				message: "Price must be greater than zero",
+				context: "product",
+			});
+		}
+
+		if (this.notification.hasErrors()) {
+			throw new NotificationError(this.notification);
 		}
 	}
 
