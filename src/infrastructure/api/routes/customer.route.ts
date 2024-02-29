@@ -2,13 +2,14 @@ import express, { type Request, type Response } from "express";
 import { CreateCustomerUseCase } from "../../../usecase/customer/create/create.customer.usecase";
 import { CustomerRepository } from "../../customer/repository/drizzle/customer.repository";
 import ListCustomerUseCase from "../../../usecase/customer/list/list.customer.usecase";
+import { CustomerPresenter } from "../presenters/customer.presenter";
 
 export const customerRouter = express.Router();
 
 customerRouter.post("/customer", async (req: Request, res: Response) => {
 	const customerRepository = new CustomerRepository(req.db);
 	const useCase = new CreateCustomerUseCase(customerRepository);
-	console.log(req.body);
+
 	try {
 		const output = await useCase.execute({
 			name: req.body.name,
@@ -30,8 +31,11 @@ customerRouter.get("/customer", async (req: Request, res: Response) => {
 	const useCase = new ListCustomerUseCase(customerRepository);
 
 	try {
-		const customers = await useCase.execute({});
-		res.status(200).json(customers);
+		const output = await useCase.execute({});
+		res.format({
+			json: () => res.send(output),
+			xml: () => res.send(CustomerPresenter.listXML(output)),
+		});
 	} catch (err) {
 		res.status(500).json(err);
 	}
