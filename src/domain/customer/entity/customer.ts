@@ -2,6 +2,7 @@ import { Entity } from "../../@shared/entity/entity.abstract";
 import { NotificationError } from "../../@shared/notification/notification.error";
 import { CustomerAddressChangedEvent } from "../event/customer-address-changed.event";
 import { CustomerCreateEvent } from "../event/customer-created.event";
+import { CustomerValidatorFactory } from "../factory/customer.validator.factory";
 import type { Address } from "../value-object/address";
 
 export class Customer extends Entity {
@@ -54,19 +55,7 @@ export class Customer extends Entity {
 	}
 
 	validate() {
-		// is possible to add business rules here
-		if (!this._name) {
-			this.notification.addError({
-				message: "Name is required",
-				context: "customer",
-			});
-		}
-		if (!this.id) {
-			this.notification.addError({
-				message: "Id is required",
-				context: "customer",
-			});
-		}
+		CustomerValidatorFactory.create().validate(this);
 	}
 
 	addRewardPoints(points: number) {
