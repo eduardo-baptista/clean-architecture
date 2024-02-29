@@ -1,10 +1,10 @@
-import { AggregateRoot } from "../../@shared/entity/aggregate-root";
+import { Entity } from "../../@shared/entity/entity.abstract";
+import { NotificationError } from "../../@shared/notification/notification.error";
 import { CustomerAddressChangedEvent } from "../event/customer-address-changed.event";
 import { CustomerCreateEvent } from "../event/customer-created.event";
 import type { Address } from "../value-object/address";
 
-export class Customer extends AggregateRoot {
-	private _id: string;
+export class Customer extends Entity {
 	private _name: string;
 	private _address!: Address;
 	private _active = false;
@@ -15,6 +15,10 @@ export class Customer extends AggregateRoot {
 		this._id = id;
 		this._name = name;
 		this.validate();
+
+		if (this.notification.hasErrors()) {
+			throw new NotificationError(this.notification);
+		}
 	}
 
 	static create(id: string, name: string) {
@@ -22,10 +26,6 @@ export class Customer extends AggregateRoot {
 		customer.addEvent(new CustomerCreateEvent(id, name));
 
 		return customer;
-	}
-
-	get id(): string {
-		return this._id;
 	}
 
 	get name(): string {
@@ -49,14 +49,24 @@ export class Customer extends AggregateRoot {
 		this._address.validate();
 
 		this.addEvent(
-			new CustomerAddressChangedEvent(this._id, this._name, this._address),
+			new CustomerAddressChangedEvent(this.id, this._name, this._address),
 		);
 	}
 
 	validate() {
 		// is possible to add business rules here
-		if (!this._name) throw new Error("Name is required");
-		if (!this._id) throw new Error("Id is required");
+		if (!this._name) {
+			this.notification.addError({
+				message: "Name is required",
+				context: "customer",
+			});
+		}
+		if (!this.id) {
+			this.notification.addError({
+				message: "Id is required",
+				context: "customer",
+			});
+		}
 	}
 
 	addRewardPoints(points: number) {

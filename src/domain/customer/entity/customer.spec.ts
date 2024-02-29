@@ -4,11 +4,19 @@ import { Address } from "../value-object/address";
 
 describe("Customer unit tests", () => {
 	it("should throw error when id is empty", () => {
-		expect(() => new Customer("", "Eduardo")).toThrow("Id is required");
+		expect(() => new Customer("", "Eduardo")).toThrow(
+			"customer: Id is required",
+		);
 	});
 
 	it("should throw error when name is empty", () => {
-		expect(() => new Customer("123", "")).toThrow("Name is required");
+		expect(() => new Customer("123", "")).toThrow("customer: Name is required");
+	});
+
+	it("should throw error when name and id are empty", () => {
+		expect(() => new Customer("", "")).toThrow(
+			"customer: Name is required,customer: Id is required",
+		);
 	});
 
 	it("should register event when create a customer", () => {
